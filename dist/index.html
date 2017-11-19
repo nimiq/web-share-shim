@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Web Share Shim</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="theme-color" content="#4285f4">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
+    <style>
+      html,body{
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      button{
+        border: 0;
+        outline: 0;
+        background: #9b26af;
+        color: white;
+        box-shadow: rgba(0, 0, 0, 0.5) 0 2px 4px;
+        font-size: 40px;
+        padding: 16px 32px;
+      }
+    </style>
+  </head>
+  <body >
+    <button onclick="shareMe()">Share</button>
+  </body>
+
+  <!-- WebShareShim Example Usage -->
+  <script src="web-share-shim.min.js"></script>
+  <script>
+    function shareMe(){
+
+        navigator.share({
+            title: 'Web Fundamentals',
+            text: 'Check out Web Fundamentals — it rocks!',
+            url: 'https://developers.google.com/web',
+        })
+        .then( _ => console.log('Successful share'))
+        .catch( error => console.log('Error sharing', error));
+        
+    }
+  </script>
+</html>
+
+   
