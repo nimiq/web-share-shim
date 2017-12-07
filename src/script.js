@@ -1,5 +1,5 @@
+if(navigator.share)return;
 (async function(){
-	if(navigator.share)return;
 
 	const htmlTemplate = await fetch('src/template.html').then(response => response.text());
 	const cssTemplate = await fetch('src/style.css').then(response => response.text());
