@@ -34,7 +34,7 @@ gulp.task('minify-js', () =>
       }
     }))
     .pipe(rename(componenentName+'.min.js'))
-    .pipe(gulp.dest('./')));
+    .pipe(gulp.dest('.')));
 
 
 gulp.task('stamp-templates', function(){
