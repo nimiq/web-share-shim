@@ -6,13 +6,17 @@
 	const template = `${htmlTemplate} <style>${cssTemplate}</style>`;
 
 
-	let isDesktop = window.innerWidth > 600;  // Hack to detect desktops / tablets 
+	let android = navigator.userAgent.match(/Android/i);
+    let ios = navigator.userAgent.match(/iPhone|iPad|iPod/i);
+	let isDesktop = !(ios || android); // on those two support "mobile deep links", so HTTP based fallback for all others.
 
+	// sms on ios 'sms:;body='+payload, on Android 'sms:?body='+payload
 	let shareUrls = {
     	whatsapp: payload => (isDesktop ? 'https://api.whatsapp.com/send?text=' : 'whatsapp://send?text=') + payload,
     	telegram: payload =>  (isDesktop ? 'https://telegram.me/share/msg?url='+location.host+'&text=' : 'tg://msg?text=') + payload,
     	facebook: payload => 'fb-messenger://share/?message='+payload,
-    	email:    payload => 'mailto:?body='+payload    	
+    	email:    payload => 'mailto:?body='+payload,
+    	sms:      payload => 'sms:?body='+payload 	
 	}
 
 	class WebShareUI{
@@ -27,10 +31,12 @@
 			this.$whatsapp = el.querySelector('.web-share-whatsapp');
 			this.$facebook = el.querySelector('.web-share-facebook');
 			this.$telegram = el.querySelector('.web-share-telegram');
-			this.$copy     = el.querySelector('.web-share-copy');
 			this.$email    = el.querySelector('.web-share-email');
+		    this.$sms      = el.querySelector('.web-share-sms');
+			this.$copy     = el.querySelector('.web-share-copy');
 		    this.$copy.onclick = _ => this._copy();
 		    this.$root.onclick = _ => this._hide();
+		    this.$root.classList.toggle('desktop', isDesktop)
 
 			document.body.appendChild(el);
 		}
@@ -43,6 +49,7 @@
 	    	this.$facebook.href = shareUrls.facebook(payload);
 	    	this.$telegram.href = shareUrls.telegram(payload);
 	    	this.$email.href = shareUrls.email(payload);
+	    	this.$sms.href = shareUrls.sms(payload);
 		}
 
 		_copy(){
