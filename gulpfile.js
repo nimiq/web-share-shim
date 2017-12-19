@@ -21,7 +21,7 @@ gulp.task('minify-css', () => {
 });
 
 gulp.task('minify-html', function() {
-  return gulp.src('src/*.html')
+  return gulp.src(	'src/*.html')
     .pipe(htmlmin({collapseWhitespace: true}))
     .pipe(gulp.dest('tmp'));
 });
@@ -34,7 +34,7 @@ gulp.task('minify-js', () =>
       }
     }))
     .pipe(rename(componenentName+'.min.js'))
-    .pipe(gulp.dest('dist')));
+    .pipe(gulp.dest('./')));
 
 
 gulp.task('stamp-templates', function(){
