@@ -81,6 +81,10 @@
   background-repeat: no-repeat;
 }
 
+.web-share-item[href=""] {
+    display: none;
+}
+
 .web-share-item-desc{
   text-align: center;
   margin-top: 4px;
