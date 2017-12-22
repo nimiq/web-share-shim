@@ -1,15 +1,15 @@
-# Web share API shim
-This shim will provide `navigator.share()` so you can share content on any device via WhatsApp, Telegram, Facebook, e-mail, and SMS.
-Try the [demo](demo/)! The whole package is 9.6kB minified, 4kB gzipped and licensed under the MIT License.
+# A polyfill for the WebShare API
+This polyfill will provide `navigator.share()` so you can share content on any device via WhatsApp, Telegram, Facebook, e-mail, and SMS.
+Try the [demo](http://nimiq.github.io/web-share-shim/demo/)! The whole package is 9.6kB minified, 4kB gzipped and licensed under the MIT License.
 
 ## Usage
 Open the share dialog by calling `navigator.share`:
 
 ```javascript
   navigator.share({
-    title: 'Web Fundamentals',
-    text: 'Check out Web Fundamentals — it rocks!',
-    url: 'https://developers.google.com/web',
+    title: 'Web Share Shim',
+    text: 'Check out Web Share Shim — it rocks!',
+    url: 'http://nimiq.github.io/web-share-shim',
   })
   .then( _ => console.log('Successful share'))
   .catch( error => console.log('Error sharing', error));
@@ -29,4 +29,4 @@ You need to have gulp and all dependencies installed.
 npm install 
 npm install gulp
 ```
-Then run `gulp` to start the build preocess.
+Then run `gulp` to build `web-share-shim.min.js`.
