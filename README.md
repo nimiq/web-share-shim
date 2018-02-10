@@ -1,5 +1,5 @@
-# A polyfill for the WebShare API
-This polyfill will provide `navigator.share()` so you can share content on any device via WhatsApp, Telegram, Facebook, e-mail, and SMS.
+# Web Share Shim
+A polyfill for the WebShare API. It provides `navigator.share()` so you can share content on any device via WhatsApp, Telegram, Facebook, e-mail, and SMS.
 Try the [demo](http://nimiq.github.io/web-share-shim/demo/)! The whole package is 9.6kB minified, 4kB gzipped and licensed under the MIT License.
 
 ## Usage
