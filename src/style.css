@@ -29,16 +29,10 @@
   justify-content: flex-end;
   z-index: 100000;
   display: none;
-  animation: moveDown 0.3s ease-in-out;
 }
 
 .web-share-visible{
-  display: flex;
-  animation: moveDown 0.3s ease-in-out;
-}
-
-@keyframes moveDown { 
-  from { transform: translateY(10px); opacity:0; } 
+  display: flex !important;
 }
 
 .web-share-container{
@@ -52,6 +46,11 @@
     padding: 16px 23px;
     text-align: left;
     color: black;
+    animation: moveDown 0.3s ease-in-out;
+}
+
+@keyframes moveDown {
+    from { transform: translateY(10vh); opacity:0; }
 }
 
 .web-share-container.web-share-cancel{
