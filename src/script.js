@@ -1,10 +1,7 @@
 (async function(){
 	if(navigator.share)return;
 
-	const htmlTemplate = await fetch('src/template.html').then(response => response.text());
-	const cssTemplate = await fetch('src/style.css').then(response => response.text());
-	const template = `${htmlTemplate} <style>${cssTemplate}</style>`;
-
+	const template = await fetch('../src/template.html').then(response => response.text());
 
 	let android = navigator.userAgent.match(/Android/i);
     let ios = navigator.userAgent.match(/iPhone|iPad|iPod/i);
@@ -17,7 +14,7 @@
     	facebook: (payload, fbid, url) => !fbid ? "" : (isDesktop ? 'https://www.facebook.com/dialog/share?app_id='+fbid+'&display=popup&href='+url+'&redirect_uri='+encodeURIComponent(location.href)+'&quote=' : 'fb-messenger://share/?message=') + payload,
     	email:    payload => 'mailto:?body='+payload,
     	sms:      payload => 'sms:?body='+payload 	
-	}
+	};
 
 	class WebShareUI{
 		_lazyRenderDOM(){
@@ -34,9 +31,9 @@
 			this.$email    = el.querySelector('.web-share-email');
 		    this.$sms      = el.querySelector('.web-share-sms');
 			this.$copy     = el.querySelector('.web-share-copy');
-		    this.$copy.onclick = _ => this._copy();
-		    this.$root.onclick = _ => this._hide();
-		    this.$root.classList.toggle('desktop', isDesktop)
+		    this.$copy.onclick = () => this._copy();
+		    this.$root.onclick = () => this._hide();
+		    this.$root.classList.toggle('desktop', isDesktop);
 
 			document.body.appendChild(el);
 		}
@@ -73,44 +70,44 @@
 	navigator.share = function(data){
 		shareUi.show(data);
 		return Promise.resolve();
-	}
+	};
 
 	navigator.copy = function (text){
 	  // A <span> contains the text to copy
-	  var span = document.createElement('span')
-	  span.textContent = text
-	  span.style.whiteSpace = 'pre' // Preserve consecutive spaces and newlines
+	  var span = document.createElement('span');
+	  span.textContent = text;
+	  span.style.whiteSpace = 'pre'; // Preserve consecutive spaces and newlines
 
 	  // An <iframe> isolates the <span> from the page's styles
-	  var iframe = document.createElement('iframe')
-	  iframe.sandbox = 'allow-same-origin'
-	  document.body.appendChild(iframe)
+	  var iframe = document.createElement('iframe');
+	  iframe.sandbox = 'allow-same-origin';
+	  document.body.appendChild(iframe);
 
-	  var win = iframe.contentWindow
-	  win.document.body.appendChild(span)
+	  var win = iframe.contentWindow;
+	  win.document.body.appendChild(span);
 
-	  var selection = win.getSelection()
+	  var selection = win.getSelection();
 
 	  // Firefox fails to get a selection from <iframe> window, so fallback
 	  if (!selection) {
-	    win = window
-	    selection = win.getSelection()
+	    win = window;
+	    selection = win.getSelection();
 	    document.body.appendChild(span)
 	  }
 
-	  var range = win.document.createRange()
-	  selection.removeAllRanges()
-	  range.selectNode(span)
-	  selection.addRange(range)
+	  var range = win.document.createRange();
+	  selection.removeAllRanges();
+	  range.selectNode(span);
+	  selection.addRange(range);
 
-	  var success = false
+	  var success = false;
 	  try {
 	    success = win.document.execCommand('copy')
 	  } catch (err) {}
 
-	  selection.removeAllRanges()
-	  span.remove()
-	  iframe.remove()
+	  selection.removeAllRanges();
+	  span.remove();
+	  iframe.remove();
 
 	  return success
 	}

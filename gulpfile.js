@@ -4,53 +4,61 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     rename = require('gulp-rename'),
     uglify = require('gulp-uglify'),
-	cleanCSS = require('gulp-clean-css'),
-	htmlmin = require('gulp-htmlmin'),
-	replace = require('gulp-replace'),
-	fs = require("fs"),
+    cleanCSS = require('gulp-clean-css'),
+    htmlmin = require('gulp-htmlmin'),
+    replace = require('gulp-replace'),
+    insert = require('gulp-insert'),
+    fs = require("fs"),
     minify = require('gulp-babel-minify'),
-    clean = require('gulp-clean');
+    clean = require('gulp-clean'),
+    merge = require('merge2');
 
-
-gulp.task('default', ['minify-css','minify-html','stamp-templates','minify-js']);
-
-gulp.task('minify-css', () => {
-  return gulp.src('src/*.css')
-    .pipe(cleanCSS())
-    .pipe(gulp.dest('tmp'));
-});
-
-gulp.task('minify-html', function() {
-  return gulp.src(	'src/*.html')
-    .pipe(htmlmin({collapseWhitespace: true}))
-    .pipe(gulp.dest('tmp'));
-});
- 
-gulp.task('minify-js', () =>
-  gulp.src('tmp/script.js')
-    .pipe(minify({
-      mangle: {
-        keepClassName: true
-      }
-    }))
-    .pipe(rename(componenentName+'.min.js'))
-    .pipe(gulp.dest('.')));
-
-
-gulp.task('stamp-templates', function(){
-  var htmlTemplate = fs.readFileSync("tmp/template.html", "utf8");
-  var cssTemplate = fs.readFileSync("tmp/style.css", "utf8");
-  gulp.src(['src/*.js'])
-    .pipe(replace('${htmlTemplate}', htmlTemplate))
-    .pipe(replace('${cssTemplate}', cssTemplate))
-    .pipe(replace('async function(', 'function('))
-    .pipe(replace("const htmlTemplate = await fetch('src/template.html').then(response => response.text());", ''))
-    .pipe(replace("const cssTemplate = await fetch('src/style.css').then(response => response.text());", ''))
-    .pipe(gulp.dest('tmp/'));
-});
-
- 
 gulp.task('clean', function () {
-    return gulp.src('tmp', {read: false})
+    return gulp.src([componenentName + '.bundle.min.js', componenentName + '.html'], {read: false})
         .pipe(clean());
+});
+
+function minifyCss() {
+    return gulp.src('src/*.css')
+        .pipe(cleanCSS());
+}
+
+function minifyHtml() {
+    return gulp.src('src/*.html')
+        .pipe(htmlmin({collapseWhitespace: true}));
+}
+
+function minifyJs(jsStream) {
+    return jsStream
+        .pipe(minify({
+            mangle: {
+                keepClassName: true
+            }
+        }));
+}
+
+function buildTemplate() {
+    const cssStream = minifyCss().pipe(insert.wrap('<style>', '</style>'));
+    const htmlStream = minifyHtml().pipe(replace('<link rel="stylesheet" href="/src/style.css" type="text/css">', ''));
+    return merge(cssStream, htmlStream)
+        .pipe(concat(componenentName + '.html'));
+}
+
+async function buildBundle(templateStream) {
+    return new Promise(resolve => {
+        templateStream.on('data', file => {
+            const template = file.contents.toString();
+            const bundleStream = gulp.src(['src/*.js'])
+                .pipe(replace('async function(', 'function('))
+                .pipe(replace("await fetch('../src/template.html').then(response => response.text())", '`' + template + '`'));
+            resolve(minifyJs(bundleStream)
+                .pipe(rename(componenentName + '.bundle.min.js')));
+        });
+    });
+}
+
+gulp.task('default', async () => {
+    const templateStream = buildTemplate()/*.pipe(gulp.dest('.'))*/;
+    const bundleStream = (await buildBundle(templateStream)).pipe(gulp.dest('.'));
+    return merge(templateStream, bundleStream);
 });
