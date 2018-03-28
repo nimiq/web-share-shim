@@ -29,4 +29,4 @@ You need to have gulp and all dependencies installed.
 npm install 
 npm install gulp
 ```
-Then run `gulp` to build `web-share-shim.min.js`.
+Then run `gulp` to build `web-share-shim.bundle.min.js`.
