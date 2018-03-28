@@ -14,8 +14,11 @@ var gulp = require('gulp'),
     merge = require('merge2');
 
 gulp.task('clean', function () {
-    return gulp.src([componenentName + '.bundle.min.js', componenentName + '.html'], {read: false})
-        .pipe(clean());
+    return gulp.src([
+        componenentName + '.bundle.min.js',
+        componenentName + '.nimiq.min.js',
+        componenentName + '.html',
+    ], {read: false}).pipe(clean());
 });
 
 function minifyCss() {
@@ -49,8 +52,8 @@ async function buildBundle(templateStream) {
         templateStream.on('data', file => {
             const template = file.contents.toString();
             const bundleStream = gulp.src(['src/*.js'])
-                .pipe(replace('async function(', 'function('))
-                .pipe(replace("await fetch('../src/template.html').then(response => response.text())", '`' + template + '`'));
+                .pipe(replace("fetch('../src/template.html').then(response => response.text())",
+                    'Promise.resolve(`' + template + '`)'));
             resolve(minifyJs(bundleStream)
                 .pipe(rename(componenentName + '.bundle.min.js')));
         });
@@ -58,7 +61,20 @@ async function buildBundle(templateStream) {
 }
 
 gulp.task('default', async () => {
-    const templateStream = buildTemplate()/*.pipe(gulp.dest('.'))*/;
+    const templateStream = buildTemplate();
     const bundleStream = (await buildBundle(templateStream)).pipe(gulp.dest('.'));
     return merge(templateStream, bundleStream);
+});
+
+// lazy loading version for nimiq apps
+gulp.task('build-nimiq', () => {
+    const templateStream = buildTemplate().pipe(gulp.dest('.'));
+    let nimiqStream = gulp.src(['src/*.js'])
+        .pipe(replace("fetch('../src/template.html').then(response => response.text())",
+            "fetch('/libraries/web-share-shim/web-share-shim.html').then(response => response.text())"));
+    nimiqStream = minifyJs(nimiqStream)
+        .pipe(insert.prepend('// @asset(/libraries/web-share-shim/web-share-shim.html)\n'))
+        .pipe(rename(componenentName + '.nimiq.min.js'))
+        .pipe(gulp.dest('.'));
+    return merge(templateStream, nimiqStream);
 });

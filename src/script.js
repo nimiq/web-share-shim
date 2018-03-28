@@ -1,7 +1,5 @@
-(async function(){
+(function(){
 	if(navigator.share)return;
-
-	const template = await fetch('../src/template.html').then(response => response.text());
 
 	let android = navigator.userAgent.match(/Android/i);
     let ios = navigator.userAgent.match(/iPhone|iPad|iPod/i);
@@ -17,25 +15,30 @@
 	};
 
 	class WebShareUI{
-		_lazyRenderDOM(){
-			if(this._initialized) return;
+		/*async*/
+		_init(){
+			if(this._initialized) return Promise.resolve();
 			this._initialized = true;
-			
-			let el = document.createElement('div');
-			el.innerHTML = template;
 
-			this.$root     = el.querySelector('.web-share');
-			this.$whatsapp = el.querySelector('.web-share-whatsapp');
-			this.$facebook = el.querySelector('.web-share-facebook');
-			this.$telegram = el.querySelector('.web-share-telegram');
-			this.$email    = el.querySelector('.web-share-email');
-		    this.$sms      = el.querySelector('.web-share-sms');
-			this.$copy     = el.querySelector('.web-share-copy');
-		    this.$copy.onclick = () => this._copy();
-		    this.$root.onclick = () => this._hide();
-		    this.$root.classList.toggle('desktop', isDesktop);
+            const templatePromise = fetch('../src/template.html').then(response => response.text());
 
-			document.body.appendChild(el);
+            return templatePromise.then(template => {
+                const el = document.createElement('div');
+                el.innerHTML = template;
+
+                this.$root     = el.querySelector('.web-share');
+                this.$whatsapp = el.querySelector('.web-share-whatsapp');
+                this.$facebook = el.querySelector('.web-share-facebook');
+                this.$telegram = el.querySelector('.web-share-telegram');
+                this.$email    = el.querySelector('.web-share-email');
+                this.$sms      = el.querySelector('.web-share-sms');
+                this.$copy     = el.querySelector('.web-share-copy');
+                this.$copy.onclick = () => this._copy();
+                this.$root.onclick = () => this._hide();
+                this.$root.classList.toggle('desktop', isDesktop);
+
+                document.body.appendChild(el);
+			});
 		}
 
 		_setPayload(payloadObj){
@@ -51,13 +54,51 @@
 		}
 
 		_copy(){
-			navigator.copy(this.payload);
+            // A <span> contains the text to copy
+            const span = document.createElement('span');
+            span.textContent = this.payload;
+            span.style.whiteSpace = 'pre'; // Preserve consecutive spaces and newlines
+
+            // An <iframe> isolates the <span> from the page's styles
+            const iframe = document.createElement('iframe');
+            iframe.sandbox = 'allow-same-origin';
+            document.body.appendChild(iframe);
+
+            let win = iframe.contentWindow;
+            win.document.body.appendChild(span);
+
+            let selection = win.getSelection();
+
+            // Firefox fails to get a selection from <iframe> window, so fallback
+            if (!selection) {
+                win = window;
+                selection = win.getSelection();
+                document.body.appendChild(span)
+            }
+
+            const range = win.document.createRange();
+            selection.removeAllRanges();
+            range.selectNode(span);
+            selection.addRange(range);
+
+            let success = false;
+            try {
+                success = win.document.execCommand('copy')
+            } catch (err) {}
+
+            selection.removeAllRanges();
+            span.remove();
+            iframe.remove();
+
+            return success;
 		}
 
+		/*async*/
 		show(payloadObj){
-			this._lazyRenderDOM();
-			this._setPayload(payloadObj);
-			this.$root.classList.add('web-share-visible');
+			return this._init().then(() => {
+                this._setPayload(payloadObj);
+                this.$root.classList.add('web-share-visible');
+			});
 		}
 
 		_hide(){
@@ -68,49 +109,8 @@
 	const shareUi = new WebShareUI();
 
 	navigator.share = function(data){
-		shareUi.show(data);
-		return Promise.resolve();
+		return shareUi.show(data);
 	};
-
-	navigator.copy = function (text){
-	  // A <span> contains the text to copy
-	  var span = document.createElement('span');
-	  span.textContent = text;
-	  span.style.whiteSpace = 'pre'; // Preserve consecutive spaces and newlines
-
-	  // An <iframe> isolates the <span> from the page's styles
-	  var iframe = document.createElement('iframe');
-	  iframe.sandbox = 'allow-same-origin';
-	  document.body.appendChild(iframe);
-
-	  var win = iframe.contentWindow;
-	  win.document.body.appendChild(span);
-
-	  var selection = win.getSelection();
-
-	  // Firefox fails to get a selection from <iframe> window, so fallback
-	  if (!selection) {
-	    win = window;
-	    selection = win.getSelection();
-	    document.body.appendChild(span)
-	  }
-
-	  var range = win.document.createRange();
-	  selection.removeAllRanges();
-	  range.selectNode(span);
-	  selection.addRange(range);
-
-	  var success = false;
-	  try {
-	    success = win.document.execCommand('copy')
-	  } catch (err) {}
-
-	  selection.removeAllRanges();
-	  span.remove();
-	  iframe.remove();
-
-	  return success
-	}
 
 }());
 
