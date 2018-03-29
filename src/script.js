@@ -1,5 +1,7 @@
-(function(){
-	if(navigator.share)return;
+navigator.share = navigator.share || (function(){
+    if (navigator.share) {
+        return navigator.share;
+    }
 
 	let android = navigator.userAgent.match(/Android/i);
     let ios = navigator.userAgent.match(/iPhone|iPad|iPod/i);
@@ -59,22 +61,14 @@
             span.textContent = this.payload;
             span.style.whiteSpace = 'pre'; // Preserve consecutive spaces and newlines
 
-            // An <iframe> isolates the <span> from the page's styles
-            const iframe = document.createElement('iframe');
-            iframe.sandbox = 'allow-same-origin';
-            document.body.appendChild(iframe);
+            // Paint the span outside the viewport
+            span.style.position = 'absolute';
+            span.style.left = '-9999px';
+            span.style.top = '-9999px';
 
-            let win = iframe.contentWindow;
+            const win = window;
+            const selection = win.getSelection();
             win.document.body.appendChild(span);
-
-            let selection = win.getSelection();
-
-            // Firefox fails to get a selection from <iframe> window, so fallback
-            if (!selection) {
-                win = window;
-                selection = win.getSelection();
-                document.body.appendChild(span)
-            }
 
             const range = win.document.createRange();
             selection.removeAllRanges();
@@ -83,12 +77,11 @@
 
             let success = false;
             try {
-                success = win.document.execCommand('copy')
+                success = win.document.execCommand('copy');
             } catch (err) {}
 
             selection.removeAllRanges();
             span.remove();
-            iframe.remove();
 
             return success;
 		}
@@ -108,9 +101,8 @@
 
 	const shareUi = new WebShareUI();
 
-	navigator.share = function(data){
-		return shareUi.show(data);
-	};
+	/* async */
+	return data => shareUi.show(data);
 
 }());
 
