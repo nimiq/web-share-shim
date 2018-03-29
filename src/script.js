@@ -89,13 +89,25 @@ navigator.share = navigator.share || (function(){
 		/*async*/
 		show(payloadObj){
 			return this._init().then(() => {
-                this._setPayload(payloadObj);
-                this.$root.classList.add('web-share-visible');
+                clearTimeout(this._hideTimer);
+			    this._setPayload(payloadObj);
+                this.$root.style.display = 'flex';
+                this.$root.offsetWidth; // style update
+                this.$root.style.background = 'rgba(0,0,0,.4)';
+                document.querySelectorAll('.web-share-container').forEach(el => {
+                    el.style.transform = 'translateY(0)';
+                    el.style.opacity = 1;
+                });
 			});
 		}
 
 		_hide(){
-			this.$root.classList.remove('web-share-visible');
+            this.$root.style.background = null;
+            document.querySelectorAll('.web-share-container').forEach(el => {
+                el.style.transform = null;
+                el.style.opacity = null;
+            });
+            this._hideTimer = setTimeout(() => this.$root.style.display = null, 400);
 		}
 	}
 
