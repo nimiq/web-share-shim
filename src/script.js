@@ -12,8 +12,8 @@ navigator.share = navigator.share || (function(){
     	whatsapp: payload => (isDesktop ? 'https://api.whatsapp.com/send?text=' : 'whatsapp://send?text=') + payload,
     	telegram: payload => (isDesktop ? 'https://telegram.me/share/msg?url='+location.host+'&text=' : 'tg://msg?text=') + payload,
     	facebook: (payload, fbid, url) => !fbid ? "" : (isDesktop ? 'https://www.facebook.com/dialog/share?app_id='+fbid+'&display=popup&href='+url+'&redirect_uri='+encodeURIComponent(location.href)+'&quote=' : 'fb-messenger://share/?message=') + payload,
-    	email:    payload => 'mailto:?body='+payload,
-    	sms:      payload => 'sms:?body='+payload 	
+    	email:    (payload, title) => 'mailto:?subject='+title+'&body='+payload,
+    	sms:      payload => 'sms:?body='+payload
 	};
 
 	class WebShareUI{
@@ -44,15 +44,16 @@ navigator.share = navigator.share || (function(){
 		}
 
 		_setPayload(payloadObj){
-			let payload = payloadObj.title + ' ' + payloadObj.text + ' ' + payloadObj.url;
+			let payload = payloadObj.text + ' ' + payloadObj.url;
+			let title = payloadObj.title;
 			let facebookId = payloadObj.facebookId || '158651941570418';
-	    	this.payload = payload;
 	    	this.url = payloadObj.url;
 			payload = encodeURIComponent(payload);
+			title = encodeURIComponent(title);
 	    	this.$whatsapp.href = shareUrls.whatsapp(payload);
 	    	this.$facebook.href = shareUrls.facebook(payload, facebookId, payloadObj.url);
 	    	this.$telegram.href = shareUrls.telegram(payload);
-	    	this.$email.href = shareUrls.email(payload);
+	    	this.$email.href = shareUrls.email(payload, title);
 	    	this.$sms.href = shareUrls.sms(payload);
 		}
 
@@ -129,7 +130,7 @@ http://www.facebook.com/dialog/send
 	*/
 
 
-// See also: http://chriswren.github.io/native-social-interactions/ 
+// See also: http://chriswren.github.io/native-social-interactions/
 
 // See also: https://www.sharethis.com/platform/share-buttons/
 

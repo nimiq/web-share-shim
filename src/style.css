@@ -59,6 +59,7 @@
     text-decoration: none !important;
     color: black !important;
     cursor: pointer;
+    width: 64px;
 }
 
 .web-share-item [class^="web-share-icon-"] {
@@ -71,6 +72,7 @@
     height: 32px;
     background-position: center;
     background-repeat: no-repeat;
+    margin: 0 auto;
 }
 
 .web-share-item[href=""] {
