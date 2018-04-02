@@ -44,9 +44,10 @@ navigator.share = navigator.share || (function(){
 		}
 
 		_setPayload(payloadObj){
-			let payload = payloadObj.title+' '+payloadObj.text+' '+payloadObj.url;
+			let payload = payloadObj.title + ' ' + payloadObj.text + ' ' + payloadObj.url;
 			let facebookId = payloadObj.facebookId || '158651941570418';
 	    	this.payload = payload;
+	    	this.url = payloadObj.url;
 			payload = encodeURIComponent(payload);
 	    	this.$whatsapp.href = shareUrls.whatsapp(payload);
 	    	this.$facebook.href = shareUrls.facebook(payload, facebookId, payloadObj.url);
@@ -58,7 +59,7 @@ navigator.share = navigator.share || (function(){
 		_copy(){
             // A <span> contains the text to copy
             const span = document.createElement('span');
-            span.textContent = this.payload;
+            span.textContent = this.url;
             span.style.whiteSpace = 'pre'; // Preserve consecutive spaces and newlines
 
             // Paint the span outside the viewport
