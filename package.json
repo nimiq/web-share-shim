@@ -1,8 +1,8 @@
 {
-  "name": "web-share-shim",
-  "version": "1.0.0",
-  "description": "",
-  "main": "gulpfile.js",
+  "name": "@nimiq/web-share-shim",
+  "version": "1.1.0",
+  "description": "Polyfill for navigator.share",
+  "main": "web-share-shim.bundle.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
